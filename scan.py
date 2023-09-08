@@ -34,18 +34,29 @@ def scan():
     print(Fore.BLUE + "State: " +
           Fore.LIGHTRED_EX + nm[ip].state() + Fore.RESET)
 
+    opened_ports = []
     for protocol in nm[ip].all_protocols():
 
         print("\n----------------------------------------------------------------")
         print(Fore.BLUE + "Protocol: " +
-              Fore.LIGHTRED_EX + protocol + Fore.RESET + "\n")
+              Fore.LIGHTRED_EX + protocol + Fore.RESET)
 
         lport = nm[ip][protocol].keys()
         sorted(lport)
 
         for port in lport:
-            print("\n\t Port: %s \t State: %s \t Service: %s \t Version: %s\n" %
-                  (port, nm[ip][protocol][port]["state"], nm[ip][protocol][port]["name"], nm[ip][protocol][port]["version"]))
+            print("\n\t Port: %s \t State: %s \n" %
+                  (port, nm[ip][protocol][port]["state"]))
+
+            if nm[ip][protocol][port]["state"] == "open":
+                opened_ports.append(str(port))
+
+    # Indicate a command for obtening more info about only the opened ports and safe the scan on a file
+    if len(opened_ports) > 0:
+        print("\n Use the next command for more information about the opened ports: nmap -sS -sC -sV --min-rate 5000 -vvv -n -p %s %s -oN scan.txt" %
+              (",".join(opened_ports), ip))
+
+    print("\n")
 
 
 def main():
