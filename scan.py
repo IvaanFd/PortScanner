@@ -22,21 +22,12 @@ def clear_terminal():
 
 
 def scan():
-    pass
 
-
-def main():
-
-    clear_terminal()
-
-    print(Fore.LIGHTCYAN_EX + Style.BRIGHT + fig.renderText("Port Scanning") +
-          "\n--------------- Code By @IvanFdez2001 ---------------" + Fore.RESET)
-    print("\n")
-
-    ip = input("Enter the IP address on which you want the scan to be performed: ")
+    ip = input(
+        "\nEnter the IP address on which you want the scan to be performed: ")
 
     nm = nmap.PortScanner()
-    r = nm.scan(hosts=ip, arguments="-p- -sS -sC -sV --min-rate 5000 -vvv -n")
+    nm.scan(hosts=ip, arguments="-p- -sS -sC -sV --min-rate 5000 -vvv -n")
 
     print("\n" + Fore.BLUE + "Host: " +
           Fore.LIGHTRED_EX + ip + Fore.RESET)
@@ -47,16 +38,24 @@ def main():
 
         print("\n----------------------------------------------------------------")
         print(Fore.BLUE + "Protocol: " +
-              Fore.LIGHTRED_EX + protocol + Fore.RESET)
+              Fore.LIGHTRED_EX + protocol + Fore.RESET + "\n")
 
         lport = nm[ip][protocol].keys()
         sorted(lport)
 
         for port in lport:
-            print("\t Port: %s \t State: %s \t Service: %s" %
-                  (port, nm[ip][protocol][port]["state"], nm[ip][protocol][port]["name"]))
+            print("\n\t Port: %s \t State: %s \t Service: %s \t Version: %s\n" %
+                  (port, nm[ip][protocol][port]["state"], nm[ip][protocol][port]["name"], nm[ip][protocol][port]["version"]))
 
-    print()
+
+def main():
+
+    clear_terminal()
+
+    print(Fore.LIGHTCYAN_EX + Style.BRIGHT + fig.renderText("Port Scanning") +
+          "\n--------------- Code By @IvanFdez2001 ---------------" + Fore.RESET)
+
+    scan()
 
 
 main()
