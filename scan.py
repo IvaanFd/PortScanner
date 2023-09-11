@@ -55,6 +55,8 @@ def scan():
     if len(opened_ports) > 0:
         print("\n Use the next command for more information about the opened ports: nmap -sS -sC -sV --min-rate 5000 -vvv -n -p %s %s -oN scan.txt" %
               (",".join(opened_ports), ip))
+    else:
+    	print("The machine %s does not have any port open" % (ip))
 
     print("\n")
 
