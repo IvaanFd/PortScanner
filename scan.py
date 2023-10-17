@@ -26,8 +26,10 @@ def scan():
     ip = input(
         "\nEnter the IP address on which you want the scan to be performed: ")
 
+    print("\n" + Fore.GREEN + "[+] Escanenado... " + Fore.RESET)
+    
     nm = nmap.PortScanner()
-    nm.scan(hosts=ip, arguments="-p- -sS -sC -sV --min-rate 5000 -vvv -n")
+    nm.scan(hosts=ip, arguments="-p- --open --min-rate 5000 -T5 -sS -Pn -n -v")
 
     print("\n" + Fore.BLUE + "Host: " +
           Fore.LIGHTRED_EX + ip + Fore.RESET)
