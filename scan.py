@@ -31,7 +31,7 @@ def scan():
     nm = nmap.PortScanner()
     
     # Slower and slient scan => -p- -T2 -sS -Pn -f
-    nm.scan(hosts=ip, arguments="-p- --open --min-rate 5000 -T5 -sS -Pn -n -v")
+    nm.scan(hosts=ip, arguments="-p- --open --min-rate 5000 -T4 -sS -Pn -n -v")
 
     print("\n" + Fore.BLUE + "Host: " +
           Fore.LIGHTRED_EX + ip + Fore.RESET)
