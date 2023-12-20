@@ -70,7 +70,7 @@ def main():
     clear_terminal()
 
     print(Fore.LIGHTCYAN_EX + Style.BRIGHT + fig.renderText("Port Scanning") +
-          "\n--------------- Code By @IvanFdez2001 ---------------" + Fore.RESET)
+          "\n--------------- Code By @IvanFd ---------------" + Fore.RESET)
 
     scan()
 
