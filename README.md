@@ -9,3 +9,4 @@ Firstly it performs a quick scan of the open ports on the target IP, secondly, i
 # Necessary dependences
 
 * Nmap: pip install python-nmap
+* Pyfiglet: pip install pyfiglet
