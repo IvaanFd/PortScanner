@@ -1,8 +1,11 @@
 import os
+import sys
 import colorama
 from colorama import Fore, Style
 from pyfiglet import Figlet
 import nmap
+
+opened_ports = []
 
 fig = Figlet(font='small')
 
@@ -21,48 +24,166 @@ def clear_terminal():
         print("The operating system could not be determined")
 
 
-def scan():
+def scan(only_port, ip, command):
 
-    ip = input(
-        "\nEnter the IP address on which you want the scan to be performed: ")
+    global opened_ports
+
+    if only_port == True:
+        opened_ports.clear()
+
+    nm = nmap.PortScanner()
 
     print("\n" + Fore.GREEN + "[+] Escanenado... " + Fore.RESET)
-    
-    nm = nmap.PortScanner()
-    
-    # Slower and slient scan => -p- -T2 -sS -Pn -f
-    nm.scan(hosts=ip, arguments="-p- --open --min-rate 5000 -T4 -sS -Pn -n -v")
+
+    nm.scan(hosts=ip, arguments=command)
 
     print("\n" + Fore.BLUE + "Host: " +
           Fore.LIGHTRED_EX + ip + Fore.RESET)
-    print(Fore.BLUE + "State: " +
-          Fore.LIGHTRED_EX + nm[ip].state() + Fore.RESET)
 
-    opened_ports = []
-    for protocol in nm[ip].all_protocols():
+    try:
+        print(Fore.BLUE + "State: " +
+              Fore.LIGHTRED_EX + nm[ip].state() + Fore.RESET)
 
-        print("\n----------------------------------------------------------------")
-        print(Fore.BLUE + "Protocol: " +
-              Fore.LIGHTRED_EX + protocol + Fore.RESET)
+        if only_port == True:
 
-        lport = nm[ip][protocol].keys()
-        sorted(lport)
+            for protocol in nm[ip].all_protocols():
 
-        for port in lport:
-            print("\n\t Port: %s \t State: %s \n" %
-                  (port, nm[ip][protocol][port]["state"]))
+                print(
+                    "\n----------------------------------------------------------------")
+                print(Fore.BLUE + "Protocol: " +
+                      Fore.LIGHTRED_EX + protocol + Fore.RESET)
 
-            if nm[ip][protocol][port]["state"] == "open":
-                opened_ports.append(str(port))
+                lport = nm[ip][protocol].keys()
+                sorted(lport)
 
-    # Indicate a command for obtening more info about only the opened ports and safe the scan on a file
-    if len(opened_ports) > 0:
-        print("\n Use the next command for more information about the opened ports: nmap -sS -sC -sV --min-rate 5000 -vvv -Pn -n -p%s %s -oN scan.txt" %
-              (",".join(opened_ports), ip))
-    else:
-    	print("The machine %s does not have any port open" % (ip))
+                for port in lport:
+                    print("\n\t Port: %s \t State: %s \n" %
+                          (port, nm[ip][protocol][port]["state"]))
 
-    print("\n")
+                    if nm[ip][protocol][port]["state"] == "open":
+                        opened_ports.append(str(port))
+
+        else:
+
+            opened_ports.clear()
+
+            print("\n" + Fore.GREEN +
+                  "The scan report can be found in the file called scan.txt" + Fore.RESET)
+
+    except:
+        print(Fore.BLUE + "State: " +
+              Fore.LIGHTRED_EX + "down or no opened ports" + Fore.RESET)
+
+
+def port_scanning(target_ip):
+
+    while True:
+
+        print("\n" + Fore.CYAN + "Port scanning menu:")
+        print("1. Perform silent but slow scanning")
+        print("2. Perform noisy but fast scanning")
+        print("3. Perform normal scanning")
+        print("4. Exit")
+
+        try:
+            option = int(input("Select an option (1-4): " + Fore.RESET))
+
+            if option == 1:
+                scan(True, target_ip, "-p- --open -T2 -sS -Pn -f")
+
+                continue_scan = input(
+                    "The port scan is over, would you like to perform a more complete scan? [y/n]: " + Fore.RESET)
+                if str.lower(continue_scan) == "y":
+                    port_version_scanning(target_ip)
+                else:
+                    break
+
+            elif option == 2:
+                scan(True, target_ip, "-p- --open -min-rate 5000 -T4 -sS -Pn")
+
+                continue_scan = input(
+                    "The port scan is over, would you like to perform a more complete scan? [y/n]: " + Fore.RESET)
+                if str.lower(continue_scan) == "y":
+                    port_version_scanning(target_ip)
+                else:
+                    break
+
+            elif option == 3:
+                scan(True, target_ip, "-p- --open")
+
+                continue_scan = input(
+                    "The port scan is over, would you like to perform a more complete scan? [y/n]: " + Fore.RESET)
+                if str.lower(continue_scan) == "y":
+                    port_version_scanning(target_ip)
+                else:
+                    break
+
+            elif option == 4:
+                print("\n" + Fore.BLUE +
+                      "Leaving port scanning menu" + Fore.RESET)
+                break
+            else:
+                print(
+                    "\n" + Fore.LIGHTRED_EX + "Invalid option. Please choose an option from 1 to 4" + Fore.RESET)
+
+        except ValueError:
+            print("\n" + Fore.LIGHTRED_EX +
+                  "Error: Enter a whole number" + Fore.RESET)
+
+
+def port_version_scanning(target_ip):
+
+    global opened_ports
+
+    while True:
+
+        print("\n" + Fore.CYAN + "Port and version scanning menu:")
+        print("1. Perform silent but slow scanning")
+        print("2. Perform noisy but fast scanning")
+        print("3. Perform normal scanning")
+        print("4. Exit")
+
+        try:
+            option = int(input("Select an option (1-4): " + Fore.RESET))
+
+            if option == 1:
+                if (len(opened_ports) == 0):
+                    scan(False, target_ip,
+                         "-p- --open -T2 -sS -sC -sV -Pn -f -oN scan.txt")
+                else:
+                    ports = ",".join(opened_ports)
+                    scan(False, target_ip,
+                         f"-p{ports} -T2 -sS -sC -sV -Pn -f -oN scan.txt")
+                    break
+            elif option == 2:
+                if (len(opened_ports) == 0):
+                    scan(False, target_ip,
+                         "-p- --open -min-rate 5000 -T4 -sS -sC -sV -Pn -oN scan.txt")
+                else:
+                    ports = ",".join(opened_ports)
+                    scan(False, target_ip,
+                         f"-p{ports} -min-rate 5000 -T4 -sS -sC -sV -Pn -oN scan.txt")
+                    break
+            elif option == 3:
+                if (len(opened_ports) == 0):
+                    scan(False, target_ip,
+                         "-p- --open -sC -sV -oN scan.txt")
+                else:
+                    ports = ",".join(opened_ports)
+                    scan(False, target_ip,
+                         f"-p{ports} -sC -sV -oN scan.txt")
+                    break
+            elif option == 4:
+                print("\n" + Fore.BLUE +
+                      "Leaving port scanning menu" + Fore.RESET)
+                break
+            else:
+                print(
+                    "\n" + Fore.LIGHTRED_EX + "Invalid option. Please choose an option from 1 to 4" + Fore.RESET)
+
+        except ValueError:
+            print("\n" + Fore.LIGHTRED_EX +
+                  "Error: Enter a whole number" + Fore.RESET)
 
 
 def main():
@@ -72,7 +193,38 @@ def main():
     print(Fore.LIGHTCYAN_EX + Style.BRIGHT + fig.renderText("Port Scanning") +
           "\n--------------- Code By @IvaanFd ---------------" + Fore.RESET)
 
-    scan()
+    if len(sys.argv) != 2:
+        print("\n" + Fore.LIGHTRED_EX +
+              "Usage: python3 scan.py <target>" + Fore.RESET)
+        sys.exit(1)
+
+    target_ip = sys.argv[1]
+
+    while True:
+
+        print("\n" + Fore.YELLOW + "Menu:")
+        print("1. Port Scanning")
+        print("2. Port and Version Scanning")
+        print("3. Exit")
+
+        try:
+            option = int(input("Select an option (1-3): " + Fore.RESET))
+
+            if option == 1:
+                port_scanning(target_ip)
+            elif option == 2:
+                port_version_scanning(target_ip)
+            elif option == 3:
+                print("\n" + Fore.BLUE +
+                      "Leaving the program, see you later!" + Fore.RESET)
+                break
+            else:
+                print(
+                    "\n" + Fore.LIGHTRED_EX + "Invalid option. Please choose an option from 1 to 3" + Fore.RESET)
+
+        except ValueError:
+            print("\n" + Fore.LIGHTRED_EX +
+                  "Error: Enter a whole number" + Fore.RESET)
 
 
 main()
