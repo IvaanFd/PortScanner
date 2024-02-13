@@ -33,7 +33,7 @@ def scan(only_port, ip, command):
 
     nm = nmap.PortScanner()
 
-    print("\n" + Fore.GREEN + "[+] Escanenado... " + Fore.RESET)
+    print("\n" + Fore.GREEN + "[+] Scanning... " + Fore.RESET)
 
     nm.scan(hosts=ip, arguments=command)
 
